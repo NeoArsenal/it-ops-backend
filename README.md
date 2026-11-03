@@ -271,7 +271,7 @@ El backend extrae sus configuraciones directamente de las variables del sistema 
 | `ALLOWED_ORIGINS` | Opcional | Dominios frontend autorizados para CORS | `https://midominio.com,*.vercel.app` |
 | `VAPID_PUBLIC_KEY` | Opcional | Clave pública VAPID para Web Push | `BEBWWjLDPLE1DJaY7MHN...` |
 | `VAPID_PRIVATE_KEY` | Opcional | Clave privada VAPID para Web Push | `SQdZm13gJ8h_R4X6...` |
-| `VAPID_SUBJECT` | Opcional | Contacto del emisor de notificaciones | `mailto:soporte@clinicalimatambo.com` |
+| `VAPID_SUBJECT` | Opcional | Contacto del emisor de notificaciones | `mailto:ejemplo@clinica.com` |
 
 ---
 
