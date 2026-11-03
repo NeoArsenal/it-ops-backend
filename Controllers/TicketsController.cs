@@ -107,7 +107,7 @@ public class TicketsController : ControllerBase
             return BadRequest(new { message = "Solo se permiten archivos de imagen." });
         }
 
-        var url = await _storageService.UploadFileAsync(file, "evidencias");
+        var url = await _storageService.UploadFileAsync(file, "incidencias");
         return Ok(new { url });
     }
 

@@ -17,11 +17,18 @@ public class StorageService : IStorageService
         _logger = logger;
     }
 
-    public async Task<string> UploadFileAsync(IFormFile file, string folder = "evidencias")
+    public async Task<string> UploadFileAsync(IFormFile file, string folder = "incidencias")
     {
-        var supabaseUrl = _config["Supabase:Url"]?.TrimEnd('/');
-        var serviceKey = _config["Supabase:ServiceKey"];
-        var bucket = _config["Supabase:Bucket"] ?? "tickets";
+        var rawUrl = Environment.GetEnvironmentVariable("SUPABASE_URL") 
+                     ?? _config["Supabase:Url"];
+        var rawKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_KEY") 
+                     ?? _config["Supabase:ServiceKey"];
+        var bucket = Environment.GetEnvironmentVariable("SUPABASE_BUCKET") 
+                     ?? _config["Supabase:Bucket"] 
+                     ?? "helpdesk-archivos";
+
+        var supabaseUrl = rawUrl?.TrimEnd('/');
+        var serviceKey = rawKey?.Replace("\"", "")?.Replace("'", "")?.Trim();
 
         if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(serviceKey))
         {
@@ -49,7 +56,7 @@ public class StorageService : IStorageService
         {
             var errBody = await response.Content.ReadAsStringAsync();
             _logger.LogError("Error subiendo archivo a Supabase Storage: {Status} - {Body}", response.StatusCode, errBody);
-            throw new InvalidOperationException($"No se pudo subir la imagen a Storage: {response.StatusCode}");
+            throw new InvalidOperationException($"No se pudo subir la imagen a Storage: {response.StatusCode} - {errBody}");
         }
 
         return $"{supabaseUrl}/storage/v1/object/public/{bucket}/{fileName}";
@@ -59,9 +66,16 @@ public class StorageService : IStorageService
     {
         if (string.IsNullOrWhiteSpace(publicUrl)) return;
 
-        var supabaseUrl = _config["Supabase:Url"]?.TrimEnd('/');
-        var serviceKey = _config["Supabase:ServiceKey"];
-        var bucket = _config["Supabase:Bucket"] ?? "tickets";
+        var rawUrl = Environment.GetEnvironmentVariable("SUPABASE_URL") 
+                     ?? _config["Supabase:Url"];
+        var rawKey = Environment.GetEnvironmentVariable("SUPABASE_SERVICE_KEY") 
+                     ?? _config["Supabase:ServiceKey"];
+        var bucket = Environment.GetEnvironmentVariable("SUPABASE_BUCKET") 
+                     ?? _config["Supabase:Bucket"] 
+                     ?? "helpdesk-archivos";
+
+        var supabaseUrl = rawUrl?.TrimEnd('/');
+        var serviceKey = rawKey?.Replace("\"", "")?.Replace("'", "")?.Trim();
 
         if (string.IsNullOrEmpty(supabaseUrl) || string.IsNullOrEmpty(serviceKey)) return;
 
@@ -79,4 +93,3 @@ public class StorageService : IStorageService
         await _httpClient.SendAsync(request);
     }
 }
-
