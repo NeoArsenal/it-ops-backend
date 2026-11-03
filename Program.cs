@@ -89,21 +89,31 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        if (!string.IsNullOrWhiteSpace(allowedOriginsEnv))
+        policy.SetIsOriginAllowed(origin =>
         {
+            if (string.IsNullOrEmpty(origin)) return false;
+            if (string.IsNullOrWhiteSpace(allowedOriginsEnv) || allowedOriginsEnv == "*")
+            {
+                return true; // Permite cualquier origen reflejándolo con credenciales
+            }
+
             var origins = allowedOriginsEnv.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            policy.WithOrigins(origins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        }
-        else
-        {
-            policy.SetIsOriginAllowed(_ => true)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        }
+            if (origins.Contains(origin, StringComparer.OrdinalIgnoreCase)) return true;
+
+            // Soporte dinámico para URLs de preview de Vercel (*.vercel.app) y localhost
+            if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+            {
+                if (uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) || uri.Host == "localhost")
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
