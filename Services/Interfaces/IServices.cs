@@ -48,6 +48,7 @@ public interface IUbicacionesService
     Task<List<string>> GetDepartamentosPorSedeAsync(string sede);
     Task<List<string>> GetAreasAsync(string sede, string departamento);
     Task<Ubicacion> CreateAsync(Ubicacion ubicacion, Guid? usuarioId);
+    Task<bool> DeleteAsync(Guid id);
 }
 
 public interface IConfiguracionService

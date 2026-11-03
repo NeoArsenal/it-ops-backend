@@ -55,5 +55,14 @@ public class UbicacionesService : IUbicacionesService
         await _context.SaveChangesAsync();
         return ubicacion;
     }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var ubi = await _context.Ubicaciones.FindAsync(id);
+        if (ubi == null) return false;
+        _context.Ubicaciones.Remove(ubi);
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
 
