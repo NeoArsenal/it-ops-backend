@@ -112,3 +112,25 @@ public interface IGuiasService
     Task<Guia> CreateAsync(CreateGuiaDto dto);
     Task<bool> DeleteAsync(Guid id);
 }
+
+public class PushNotificationPayload
+{
+    public string Title { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
+    public string? Icon { get; set; } = "/icon-192.png";
+    public string? Badge { get; set; } = "/icon-192.png";
+    public string? Url { get; set; } = "/";
+    public string? Tag { get; set; } = "limatambo-helpdesk";
+    public object? Data { get; set; }
+}
+
+public interface IPushNotificationService
+{
+    string? GetPublicKey();
+    Task<PushSubscription> SaveSubscriptionAsync(string userId, CreatePushSubscriptionDto dto);
+    Task RemoveSubscriptionAsync(string endpoint);
+    Task RemoveUserSubscriptionsAsync(string userId);
+    Task SendToUserAsync(string userId, PushNotificationPayload payload);
+    Task SendToRolesAsync(List<string> roles, PushNotificationPayload payload);
+    Task SendNewTicketAlertAsync(Ticket ticket);
+}

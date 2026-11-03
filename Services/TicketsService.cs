@@ -13,12 +13,14 @@ public class TicketsService : ITicketsService
     private readonly ApplicationDbContext _context;
     private readonly IHubContext<NotificacionesHub> _hub;
     private readonly IStorageService _storageService;
+    private readonly IPushNotificationService _pushService;
 
-    public TicketsService(ApplicationDbContext context, IHubContext<NotificacionesHub> hub, IStorageService storageService)
+    public TicketsService(ApplicationDbContext context, IHubContext<NotificacionesHub> hub, IStorageService storageService, IPushNotificationService pushService)
     {
         _context = context;
         _hub = hub;
         _storageService = storageService;
+        _pushService = pushService;
     }
 
     public async Task<List<Ticket>> GetAllAsync()
@@ -174,6 +176,16 @@ public class TicketsService : ITicketsService
 
         // Emitir por WebSocket (SignalR)
         await _hub.Clients.All.SendAsync("nuevoTicket", ticket);
+
+        // Enviar alerta Push (VAPID) en segundo plano
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await _pushService.SendNewTicketAlertAsync(ticket);
+            }
+            catch { }
+        });
 
         return ticket;
     }

@@ -191,3 +191,21 @@ public class CreateGuiaDto
     public string? Peso { get; set; }
     public Guid? AutorId { get; set; }
 }
+
+public class PushSubscriptionKeysDto
+{
+    public string P256dh { get; set; } = string.Empty;
+    public string Auth { get; set; } = string.Empty;
+}
+
+public class CreatePushSubscriptionDto
+{
+    public string Endpoint { get; set; } = string.Empty;
+    public PushSubscriptionKeysDto Keys { get; set; } = new();
+    public string? UserAgent { get; set; }
+}
+
+public class UnsubscribePushDto
+{
+    public string Endpoint { get; set; } = string.Empty;
+}

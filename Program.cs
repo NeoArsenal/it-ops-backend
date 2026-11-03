@@ -53,6 +53,7 @@ builder.Services.AddScoped<IGamificacionService, GamificacionService>();
 builder.Services.AddScoped<IAcademiaService, AcademiaService>();
 builder.Services.AddScoped<IRedService, RedService>();
 builder.Services.AddScoped<IGuiasService, GuiasService>();
+builder.Services.AddScoped<IPushNotificationService, PushNotificationService>();
 
 // 3. WebSockets en Tiempo Real (SignalR)
 builder.Services.AddSignalR();
