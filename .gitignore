@@ -1,0 +1,28 @@
+## Build Results
+[Bb]in/
+[Oo]bj/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vscode/
+.vs/
+
+## Explicit exclusion requested
+[Mm]igrations/
+Migrations/
+
+## Environment-specific configuration
+appsettings.json
+appsettings.*.json
+!appsettings.Example.json
+
+## Logs & Temp files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
