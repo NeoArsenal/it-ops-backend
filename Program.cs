@@ -12,6 +12,13 @@ using it_ops_backend.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Soporte para puerto dinámico en Render / Cloud (variable PORT)
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://*:{port}");
+}
+
 // 1. Configuración de Base de Datos PostgreSQL (Supabase / Render / Railway)
 var rawConn = builder.Configuration.GetConnectionString("DefaultConnection") 
               ?? Environment.GetEnvironmentVariable("DATABASE_URL");
