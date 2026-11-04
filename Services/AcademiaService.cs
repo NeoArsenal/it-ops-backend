@@ -62,7 +62,9 @@ public class AcademiaService : IAcademiaService
                     orden = nivel.Orden,
                     xpRecompensa = nivel.XpRecompensa,
                     cursoId = nivel.CursoId,
-                    status
+                    status,
+                    isCompleted,
+                    isUnlocked = isCompleted || status == "UNLOCKED"
                 };
             }).ToList();
 
