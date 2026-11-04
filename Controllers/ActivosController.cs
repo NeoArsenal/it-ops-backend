@@ -12,10 +12,12 @@ namespace it_ops_backend.Controllers;
 public class ActivosController : ControllerBase
 {
     private readonly IActivosService _activosService;
+    private readonly IStorageService _storageService;
 
-    public ActivosController(IActivosService activosService)
+    public ActivosController(IActivosService activosService, IStorageService storageService)
     {
         _activosService = activosService;
+        _storageService = storageService;
     }
 
     [HttpGet]
@@ -104,6 +106,66 @@ public class ActivosController : ControllerBase
 
         var intervencion = await _activosService.AddIntervencionAsync(id, dto.Descripcion, userId);
         return Ok(intervencion);
+    }
+
+    // Subir acta/cargo de entrega a Supabase Storage (carpeta 'cargos') y registrar en trazabilidad
+    [Authorize]
+    [HttpPost("{id:guid}/cargo")]
+    public async Task<IActionResult> UploadCargo(
+        Guid id, 
+        IFormFile file, 
+        [FromForm] string? cargoNumero, 
+        [FromForm] string? responsable, 
+        [FromForm] string? dni, 
+        [FromForm] string? tecnico)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No se proporcionó ningún archivo de cargo." });
+        }
+
+        var activo = await _activosService.GetByIdAsync(id);
+        if (activo == null)
+        {
+            return NotFound(new { message = "Activo no encontrado." });
+        }
+
+        // Subir a Supabase Storage dentro de la carpeta 'cargos'
+        var url = await _storageService.UploadFileAsync(file, "cargos");
+
+        // Registrar en el historial de intervenciones del equipo
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Guid? tecnicoId = Guid.TryParse(userIdStr, out var parsedGuid) ? parsedGuid : null;
+
+        var num = !string.IsNullOrWhiteSpace(cargoNumero) ? cargoNumero : "S/N";
+        var resp = !string.IsNullOrWhiteSpace(responsable) ? responsable : (activo.Responsable ?? "Usuario");
+        var dniStr = !string.IsNullOrWhiteSpace(dni) ? $" (DNI: {dni})" : "";
+        var tecStr = !string.IsNullOrWhiteSpace(tecnico) ? $" por {tecnico}" : "";
+
+        var descripcion = $"[CARGO] Acta de Entrega N° {num} firmada por {resp}{dniStr}{tecStr}. Archivo: {url}";
+        var intervencion = await _activosService.AddIntervencionAsync(id, descripcion, tecnicoId);
+
+        return Ok(new 
+        { 
+            url, 
+            cargoNumero = num, 
+            intervencionId = intervencion.Id,
+            message = "Cargo almacenado exitosamente en la carpeta 'cargos' y registrado en la trazabilidad del activo." 
+        });
+    }
+
+    // Subida general de cargo
+    [Authorize]
+    [HttpPost("upload-cargo")]
+    public async Task<IActionResult> UploadCargoGeneral(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No se proporcionó ningún archivo." });
+        }
+
+        var url = await _storageService.UploadFileAsync(file, "cargos");
+        return Ok(new { url });
     }
 
     [Authorize]

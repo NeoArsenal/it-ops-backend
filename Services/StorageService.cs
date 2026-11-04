@@ -37,12 +37,20 @@ public class StorageService : IStorageService
 
         var ext = Path.GetExtension(file.FileName);
         if (string.IsNullOrEmpty(ext)) ext = ".jpg";
-        var fileName = $"{folder}/{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{Guid.NewGuid():N}{ext}";
+
+        var rawBaseName = Path.GetFileNameWithoutExtension(file.FileName);
+        var cleanBaseName = System.Text.RegularExpressions.Regex.Replace(rawBaseName ?? "", @"[^a-zA-Z0-9_\-]", "_");
+        if (string.IsNullOrWhiteSpace(cleanBaseName)) cleanBaseName = Guid.NewGuid().ToString("N");
+
+        var fileName = $"{folder}/{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{cleanBaseName}{ext}";
 
         var requestUrl = $"{supabaseUrl}/storage/v1/object/{bucket}/{fileName}";
         using var stream = file.OpenReadStream();
         using var content = new StreamContent(stream);
-        content.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType ?? "image/jpeg");
+        var mime = !string.IsNullOrWhiteSpace(file.ContentType)
+            ? file.ContentType
+            : (ext.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ? "application/pdf" : "image/jpeg");
+        content.Headers.ContentType = new MediaTypeHeaderValue(mime);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, requestUrl)
         {
