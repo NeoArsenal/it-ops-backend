@@ -108,13 +108,17 @@ public class ActivosController : ControllerBase
     }
 
     // Agregar intervención (desde escaneo QR o mantenimiento)
+    [Authorize]
     [HttpPost("{id:guid}/intervenciones")]
     public async Task<IActionResult> AddIntervencion(Guid id, [FromBody] CreateIntervencionDto dto)
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        Guid? userId = Guid.TryParse(userIdStr, out var parsedGuid) ? parsedGuid : null;
+        if (string.IsNullOrWhiteSpace(dto.Descripcion))
+        {
+            return BadRequest(new { message = "La descripción de la intervención no puede estar vacía." });
+        }
 
-        var intervencion = await _activosService.AddIntervencionAsync(id, dto.Descripcion, userId);
+        var userId = GetCurrentUserId();
+        var intervencion = await _activosService.AddIntervencionAsync(id, dto.Descripcion.Trim(), userId);
         return Ok(intervencion);
     }
 
