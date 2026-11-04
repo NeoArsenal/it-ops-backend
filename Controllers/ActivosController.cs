@@ -67,14 +67,23 @@ public class ActivosController : ControllerBase
             FechaActualizacion = DateTime.UtcNow
         };
 
-        var created = await _activosService.CreateAsync(activo);
+        var created = await _activosService.CreateAsync(activo, GetCurrentUserId() ?? dto.RegistradoPorId);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    /// <summary>Obtiene el Id del usuario autenticado desde el JWT.</summary>
+    private Guid? GetCurrentUserId()
+    {
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(userIdStr, out var parsed) ? parsed : null;
     }
 
     [Authorize]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateActivoDto dto)
     {
+        // La trazabilidad (antes → después) se registra automáticamente en el servicio
+        var tecnicoId = GetCurrentUserId() ?? dto.TecnicoId;
         var updated = await _activosService.UpdateAsync(id, a =>
         {
             // Código y Tipo son obligatorios: nunca se sobrescriben con vacío
@@ -92,7 +101,7 @@ public class ActivosController : ControllerBase
             if (dto.Responsable != null) a.Responsable = dto.Responsable;
             if (dto.ResponsableNombre != null) a.Responsable = dto.ResponsableNombre;
             if (dto.Observaciones != null) a.Observaciones = dto.Observaciones;
-        });
+        }, tecnicoId);
 
         if (updated == null) return NotFound(new { message = "Activo no encontrado." });
         return Ok(updated);
