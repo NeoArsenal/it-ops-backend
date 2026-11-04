@@ -73,13 +73,14 @@ public class ActivosController : ControllerBase
 
     [Authorize]
     [HttpPatch("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] CreateActivoDto dto)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateActivoDto dto)
     {
         var updated = await _activosService.UpdateAsync(id, a =>
         {
-            if (dto.Codigo != null) a.Codigo = dto.Codigo;
-            if (dto.Tipo != null) a.Tipo = dto.Tipo;
-            if (dto.Estado != null) a.Estado = dto.Estado;
+            // Código y Tipo son obligatorios: nunca se sobrescriben con vacío
+            if (!string.IsNullOrWhiteSpace(dto.Codigo)) a.Codigo = dto.Codigo.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Tipo)) a.Tipo = dto.Tipo.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Estado)) a.Estado = dto.Estado;
             if (dto.Marca != null) a.Marca = dto.Marca;
             if (dto.Modelo != null) a.Modelo = dto.Modelo;
             if (dto.NumeroSerie != null) a.NumeroSerie = dto.NumeroSerie;

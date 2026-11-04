@@ -101,6 +101,30 @@ public class CreateActivoDto
     public Guid? RegistradoPorId { get; set; }
 }
 
+/// <summary>
+/// DTO para actualizaciones parciales (PATCH) de activos.
+/// Todos los campos son opcionales: si no se envían (null) NO se modifican.
+/// Evita que acciones parciales (reparar, asignar, taller) borren Código o Tipo.
+/// </summary>
+public class UpdateActivoDto
+{
+    public string? Codigo { get; set; }
+    public string? Tipo { get; set; }
+    public string? Estado { get; set; }
+    public string? Marca { get; set; }
+    public string? Modelo { get; set; }
+    public string? NumeroSerie { get; set; }
+    public string? CodigoFactura { get; set; }
+    public string? Sede { get; set; }
+    public string? Departamento { get; set; }
+    public string? Ubicacion { get; set; }
+    public Guid? UbicacionId { get; set; }
+    public string? Responsable { get; set; }
+    public string? ResponsableNombre { get; set; }
+    public string? Observaciones { get; set; }
+    public Guid? TecnicoId { get; set; }
+}
+
 public class CreateIntervencionDto
 {
     public string Descripcion { get; set; } = string.Empty;
