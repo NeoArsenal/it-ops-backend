@@ -61,6 +61,7 @@ public class CreateTicketDto
     public string Titulo { get; set; } = string.Empty;
     public string? Descripcion { get; set; }
     public string? Prioridad { get; set; } = "MEDIA";
+    public string? Categoria { get; set; } = "GENERAL";
     public string? Solicitante { get; set; }
     public string? SolicitanteNombre { get; set; }
     public string? SolicitanteContacto { get; set; }
@@ -78,6 +79,7 @@ public class UpdateTicketDto
     public string? Descripcion { get; set; }
     public string? Estado { get; set; }
     public string? Prioridad { get; set; }
+    public string? Categoria { get; set; }
     public Guid? AsignadoAId { get; set; }
     public string? Solucion { get; set; }
 }

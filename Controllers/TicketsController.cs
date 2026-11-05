@@ -124,7 +124,7 @@ public class TicketsController : ControllerBase
                 titulo = dto.Titulo,
                 estado = "ABIERTO",
                 prioridad = "BAJA",
-                xpRecompensa = 0,
+                categoria = dto.Categoria ?? "GENERAL",
                 creadoEn = DateTime.UtcNow,
                 actualizadoEn = DateTime.UtcNow
             });
@@ -135,6 +135,7 @@ public class TicketsController : ControllerBase
             Titulo = dto.Titulo,
             Descripcion = dto.Descripcion,
             Prioridad = dto.Prioridad ?? "MEDIA",
+            Categoria = !string.IsNullOrWhiteSpace(dto.Categoria) ? dto.Categoria.ToUpper() : "GENERAL",
             Solicitante = dto.Solicitante,
             SolicitanteNombre = dto.SolicitanteNombre,
             SolicitanteContacto = dto.SolicitanteContacto,
@@ -166,6 +167,7 @@ public class TicketsController : ControllerBase
             if (dto.Descripcion != null) ticket.Descripcion = dto.Descripcion;
             if (dto.Estado != null) ticket.Estado = dto.Estado;
             if (dto.Prioridad != null) ticket.Prioridad = dto.Prioridad;
+            if (!string.IsNullOrWhiteSpace(dto.Categoria)) ticket.Categoria = dto.Categoria.ToUpper();
             if (dto.AsignadoAId.HasValue) ticket.AsignadoAId = dto.AsignadoAId.Value;
             if (dto.Solucion != null) ticket.Solucion = dto.Solucion;
         }, userId, userName);

@@ -23,8 +23,8 @@ public class Ticket
     [Column("prioridad")]
     public string Prioridad { get; set; } = "MEDIA";
 
-    [Column("xpRecompensa")]
-    public int XpRecompensa { get; set; } = 150;
+    [Column("categoria")]
+    public string Categoria { get; set; } = "GENERAL";
 
     [Column("asignadoAId")]
     public Guid? AsignadoAId { get; set; }

@@ -208,4 +208,20 @@ app.MapControllers();
 // Mapeo del canal de WebSockets
 app.MapHub<NotificacionesHub>("/ws/notificaciones");
 
+// Verificación automática de esquema (tickets.categoria)
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<it_ops_backend.Data.ApplicationDbContext>();
+        db.Database.ExecuteSqlRaw(@"
+            ALTER TABLE tickets ADD COLUMN IF NOT EXISTS categoria VARCHAR(50) DEFAULT 'GENERAL';
+        ");
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning("Migración automática de esquema (tickets.categoria): {Message}", ex.Message);
+    }
+}
+
 app.Run();

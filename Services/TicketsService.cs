@@ -46,7 +46,7 @@ public class TicketsService : ITicketsService
                 departamento = t.Departamento,
                 ubicacionEspecifica = t.UbicacionEspecifica,
                 creadoEn = t.CreadoEn,
-                xpRecompensa = t.XpRecompensa,
+                categoria = t.Categoria,
                 fotoUrl = t.FotoUrl
             })
             .ToListAsync();
@@ -197,6 +197,7 @@ public class TicketsService : ITicketsService
 
         var estadoPrevio = ticket.Estado;
         var prioridadPrevia = ticket.Prioridad;
+        var categoriaPrevia = ticket.Categoria;
         var solucionPrevia = ticket.Solucion;
         var asignadoPrevio = ticket.AsignadoAId;
 
@@ -206,6 +207,19 @@ public class TicketsService : ITicketsService
         if (ticket.Estado == "RESUELTO" && estadoPrevio != "RESUELTO")
         {
             ticket.ResueltoEn = DateTime.UtcNow;
+        }
+
+        // Trazabilidad / Auditoría
+        if (ticket.Categoria != categoriaPrevia)
+        {
+            _context.TicketsHistorial.Add(new TicketHistorial
+            {
+                TicketId = ticket.Id,
+                UsuarioId = usuarioId,
+                UsuarioNombre = usuarioNombre,
+                TipoAccion = "CAMBIO_CATEGORIA",
+                Descripcion = $"Categoría reclasificada de {categoriaPrevia} a {ticket.Categoria} por {usuarioNombre}."
+            });
         }
 
         // Trazabilidad / Auditoría
