@@ -12,10 +12,12 @@ namespace it_ops_backend.Controllers;
 public class UsuariosController : ControllerBase
 {
     private readonly IUsuariosService _usuariosService;
+    private readonly IStorageService _storageService;
 
-    public UsuariosController(IUsuariosService usuariosService)
+    public UsuariosController(IUsuariosService usuariosService, IStorageService storageService)
     {
         _usuariosService = usuariosService;
+        _storageService = storageService;
     }
 
     [HttpGet]
@@ -72,6 +74,26 @@ public class UsuariosController : ControllerBase
         var updated = await _usuariosService.UpdatePreferenciasAsync(id, dto);
         if (updated == null) return NotFound(new { message = "Usuario no encontrado." });
         return Ok(updated);
+    }
+
+    [HttpPost("upload-avatar")]
+    public async Task<IActionResult> UploadAvatar(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest(new { message = "No se proporcionó ningún archivo." });
+        }
+        if (!file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Solo se permiten imágenes (JPG, PNG, WebP)." });
+        }
+        if (file.Length > 5 * 1024 * 1024)
+        {
+            return BadRequest(new { message = "La imagen no debe superar los 5MB." });
+        }
+
+        var url = await _storageService.UploadFileAsync(file, "perfiles");
+        return Ok(new { url });
     }
 }
 

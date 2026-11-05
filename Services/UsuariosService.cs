@@ -60,7 +60,7 @@ public class UsuariosService : IUsuariosService
         if (!string.IsNullOrWhiteSpace(dto.Nombre)) usuario.Nombre = dto.Nombre;
         if (!string.IsNullOrWhiteSpace(dto.Email)) usuario.Email = dto.Email;
         if (!string.IsNullOrWhiteSpace(dto.Rol)) usuario.Rol = dto.Rol;
-        if (!string.IsNullOrWhiteSpace(dto.Avatar)) usuario.Avatar = dto.Avatar;
+        if (dto.Avatar != null) usuario.Avatar = dto.Avatar;
         if (dto.TituloRPG != null) usuario.TituloRPG = dto.TituloRPG;
         if (dto.ModulosAccesibles != null) usuario.ModulosAccesiblesRaw = FormatModulos(dto.ModulosAccesibles);
 
@@ -115,7 +115,7 @@ public class UsuariosService : IUsuariosService
         var usuario = await _context.Usuarios.FindAsync(id);
         if (usuario == null) return null;
 
-        if (!string.IsNullOrWhiteSpace(dto.Avatar)) usuario.Avatar = dto.Avatar;
+        if (dto.Avatar != null) usuario.Avatar = dto.Avatar;
         if (dto.TituloRPG != null) usuario.TituloRPG = dto.TituloRPG;
         if (dto.Preferencias != null)
         {
