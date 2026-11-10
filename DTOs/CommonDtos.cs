@@ -127,11 +127,13 @@ public class UpdateActivoDto
     public string? Observaciones { get; set; }
     public Guid? TecnicoId { get; set; }
     public DateTime? FechaIngreso { get; set; }
+    public DateTime? FechaIntervencion { get; set; }
 }
 
 public class CreateIntervencionDto
 {
     public string Descripcion { get; set; } = string.Empty;
+    public DateTime? Fecha { get; set; }
 }
 
 public class CreateUbicacionDto

@@ -103,7 +103,7 @@ public class ActivosController : ControllerBase
             if (dto.ResponsableNombre != null) a.Responsable = dto.ResponsableNombre;
             if (dto.Observaciones != null) a.Observaciones = dto.Observaciones;
             if (dto.FechaIngreso.HasValue) a.FechaIngreso = dto.FechaIngreso.Value;
-        }, tecnicoId);
+        }, tecnicoId, dto.FechaIntervencion);
 
         if (updated == null) return NotFound(new { message = "Activo no encontrado." });
         return Ok(updated);
@@ -120,7 +120,7 @@ public class ActivosController : ControllerBase
         }
 
         var userId = GetCurrentUserId();
-        var intervencion = await _activosService.AddIntervencionAsync(id, dto.Descripcion.Trim(), userId);
+        var intervencion = await _activosService.AddIntervencionAsync(id, dto.Descripcion.Trim(), userId, dto.Fecha);
         return Ok(intervencion);
     }
 

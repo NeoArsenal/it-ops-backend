@@ -36,9 +36,9 @@ public interface IActivosService
     Task<Activo?> GetByIdAsync(Guid id);
     Task<Activo?> GetByCodigoAsync(string codigo);
     Task<Activo> CreateAsync(Activo activo, Guid? tecnicoId = null);
-    Task<Activo?> UpdateAsync(Guid id, Action<Activo> applyChanges, Guid? tecnicoId = null);
+    Task<Activo?> UpdateAsync(Guid id, Action<Activo> applyChanges, Guid? tecnicoId = null, DateTime? fechaIntervencion = null);
     Task<bool> DeleteAsync(Guid id);
-    Task<Intervencion> AddIntervencionAsync(Guid activoId, string descripcion, Guid? tecnicoId);
+    Task<Intervencion> AddIntervencionAsync(Guid activoId, string descripcion, Guid? tecnicoId, DateTime? fecha = null);
 }
 
 public interface IUbicacionesService

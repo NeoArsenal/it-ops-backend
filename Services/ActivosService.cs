@@ -97,7 +97,7 @@ public class ActivosService : IActivosService
     /// Aplica cambios parciales y registra automáticamente un hito de trazabilidad
     /// con el detalle (antes → después) de cada campo modificado.
     /// </summary>
-    public async Task<Activo?> UpdateAsync(Guid id, Action<Activo> applyChanges, Guid? tecnicoId = null)
+    public async Task<Activo?> UpdateAsync(Guid id, Action<Activo> applyChanges, Guid? tecnicoId = null, DateTime? fechaIntervencion = null)
     {
         var activo = await _context.Activos.FindAsync(id);
         if (activo == null) return null;
@@ -115,7 +115,7 @@ public class ActivosService : IActivosService
                 ActivoId = activo.Id,
                 Descripcion = descripcion,
                 TecnicoId = tecnicoId,
-                Fecha = DateTime.UtcNow
+                Fecha = fechaIntervencion ?? DateTime.UtcNow
             });
             await _context.SaveChangesAsync();
         }
@@ -133,14 +133,14 @@ public class ActivosService : IActivosService
         return true;
     }
 
-    public async Task<Intervencion> AddIntervencionAsync(Guid activoId, string descripcion, Guid? tecnicoId)
+    public async Task<Intervencion> AddIntervencionAsync(Guid activoId, string descripcion, Guid? tecnicoId, DateTime? fecha = null)
     {
         var intervencion = new Intervencion
         {
             ActivoId = activoId,
             Descripcion = descripcion,
             TecnicoId = tecnicoId,
-            Fecha = DateTime.UtcNow
+            Fecha = fecha ?? DateTime.UtcNow
         };
 
         _context.Intervenciones.Add(intervencion);
