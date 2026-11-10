@@ -79,6 +79,7 @@ public class ActivosService : IActivosService
         var ubicacionInicial = FormatUbicacion(activo.Sede, activo.Departamento, activo.UbicacionTexto);
         detalle.Append($"\nUbicación: {ubicacionInicial}");
         if (!string.IsNullOrWhiteSpace(activo.Responsable)) detalle.Append($"\nResponsable: {activo.Responsable}");
+        if (activo.FechaIngreso.HasValue) detalle.Append($"\nFecha de ingreso: {activo.FechaIngreso.Value:dd/MM/yyyy}");
 
         _context.Intervenciones.Add(new Intervencion
         {
@@ -154,11 +155,11 @@ public class ActivosService : IActivosService
     private record Snapshot(
         string Codigo, string Tipo, string Estado, string? Marca, string? Modelo,
         string? NumeroSerie, string? CodigoFactura, string? Sede, string? Departamento,
-        string? Ubicacion, string? Responsable, string? Observaciones)
+        string? Ubicacion, string? Responsable, string? Observaciones, DateTime? FechaIngreso)
     {
         public static Snapshot From(Activo a) => new(
             a.Codigo, a.Tipo, a.Estado, a.Marca, a.Modelo, a.NumeroSerie, a.CodigoFactura,
-            a.Sede, a.Departamento, a.UbicacionTexto, a.Responsable, a.Observaciones);
+            a.Sede, a.Departamento, a.UbicacionTexto, a.Responsable, a.Observaciones, a.FechaIngreso);
     }
 
     private static bool Changed(string? a, string? b) =>
@@ -187,6 +188,8 @@ public class ActivosService : IActivosService
         if (Changed(a.Modelo, d.Modelo)) datosCambio.Add($"Modelo: {Show(a.Modelo)} → {Show(d.Modelo)}");
         if (Changed(a.NumeroSerie, d.NumeroSerie)) datosCambio.Add($"S/N: {Show(a.NumeroSerie)} → {Show(d.NumeroSerie)}");
         if (Changed(a.CodigoFactura, d.CodigoFactura)) datosCambio.Add($"Factura: {Show(a.CodigoFactura)} → {Show(d.CodigoFactura)}");
+        if (a.FechaIngreso?.Date != d.FechaIngreso?.Date)
+            datosCambio.Add($"Fecha ingreso: {(a.FechaIngreso.HasValue ? a.FechaIngreso.Value.ToString("dd/MM/yyyy") : "—")} → {(d.FechaIngreso.HasValue ? d.FechaIngreso.Value.ToString("dd/MM/yyyy") : "—")}");
 
         if (!estadoCambio && !ubicCambio && !respCambio && !obsCambio && datosCambio.Count == 0)
             return null; // Sin cambios reales: no se ensucia el historial

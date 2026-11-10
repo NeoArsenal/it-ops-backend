@@ -63,6 +63,7 @@ public class ActivosController : ControllerBase
             Observaciones = dto.Observaciones,
             UbicacionId = dto.UbicacionId,
             RegistradoPorId = dto.RegistradoPorId,
+            FechaIngreso = dto.FechaIngreso ?? DateTime.UtcNow,
             FechaRegistro = DateTime.UtcNow,
             FechaActualizacion = DateTime.UtcNow
         };
@@ -101,6 +102,7 @@ public class ActivosController : ControllerBase
             if (dto.Responsable != null) a.Responsable = dto.Responsable;
             if (dto.ResponsableNombre != null) a.Responsable = dto.ResponsableNombre;
             if (dto.Observaciones != null) a.Observaciones = dto.Observaciones;
+            if (dto.FechaIngreso.HasValue) a.FechaIngreso = dto.FechaIngreso.Value;
         }, tecnicoId);
 
         if (updated == null) return NotFound(new { message = "Activo no encontrado." });

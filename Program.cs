@@ -208,7 +208,7 @@ app.MapControllers();
 // Mapeo del canal de WebSockets
 app.MapHub<NotificacionesHub>("/ws/notificaciones");
 
-// Verificación automática de esquema (tickets.categoria)
+// Verificación automática de esquema (tickets.categoria y activos.fechaIngreso)
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -216,11 +216,13 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<it_ops_backend.Data.ApplicationDbContext>();
         db.Database.ExecuteSqlRaw(@"
             ALTER TABLE tickets ADD COLUMN IF NOT EXISTS categoria VARCHAR(50) DEFAULT 'GENERAL';
+            ALTER TABLE activos ADD COLUMN IF NOT EXISTS ""fechaIngreso"" TIMESTAMP WITH TIME ZONE;
+            UPDATE activos SET ""fechaIngreso"" = ""fechaRegistro"" WHERE ""fechaIngreso"" IS NULL;
         ");
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning("Migración automática de esquema (tickets.categoria): {Message}", ex.Message);
+        app.Logger.LogWarning("Migración automática de esquema (tickets.categoria / activos.fechaIngreso): {Message}", ex.Message);
     }
 }
 

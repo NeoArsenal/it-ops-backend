@@ -101,6 +101,7 @@ public class CreateActivoDto
     public string? ResponsableNombre { get; set; }
     public string? Observaciones { get; set; }
     public Guid? RegistradoPorId { get; set; }
+    public DateTime? FechaIngreso { get; set; }
 }
 
 /// <summary>
@@ -125,6 +126,7 @@ public class UpdateActivoDto
     public string? ResponsableNombre { get; set; }
     public string? Observaciones { get; set; }
     public Guid? TecnicoId { get; set; }
+    public DateTime? FechaIngreso { get; set; }
 }
 
 public class CreateIntervencionDto

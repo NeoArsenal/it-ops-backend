@@ -77,6 +77,9 @@ public class Activo
     [Column("fechaRegistro")]
     public DateTime FechaRegistro { get; set; } = DateTime.UtcNow;
 
+    [Column("fechaIngreso")]
+    public DateTime? FechaIngreso { get; set; }
+
     [NotMapped]
     public DateTime CreadoEn => FechaRegistro;
 
