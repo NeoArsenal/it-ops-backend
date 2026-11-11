@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -117,6 +119,84 @@ builder.Services.AddCors(options =>
     });
 });
 
+// 6. Configuración de Rate Limiting Nativo (.NET 8)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        var retryAfter = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retry)
+            ? (int)Math.Ceiling(retry.TotalSeconds)
+            : 60;
+        context.HttpContext.Response.Headers.RetryAfter = retryAfter.ToString();
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            statusCode = 429,
+            message = "Has alcanzado el límite de solicitudes permitidas. Por favor espera un momento antes de reintentar.",
+            retryAfterSeconds = retryAfter
+        }, cancellationToken);
+    };
+
+    // Política 1: Login (Anti-fuerza bruta: máx 5 intentos por minuto por IP)
+    options.AddPolicy("LoginPolicy", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "anon-login";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
+    });
+
+    // Política 2: Portal Público (Anti-spam: máx 5 tickets creados cada 5 minutos por IP)
+    options.AddPolicy("PortalTicketsPolicy", httpContext =>
+    {
+        var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "anon-portal";
+        return RateLimitPartition.GetFixedWindowLimiter(ip, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(5),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
+    });
+
+    // Política 3: Subida de Archivos / Storage (Máx 10 subidas por minuto)
+    options.AddPolicy("UploadPolicy", httpContext =>
+    {
+        var partitionKey = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                           ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                           ?? "anon-upload";
+        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0
+        });
+    });
+
+    // Política 4: API General / Usuarios Autenticados (Máx 120 peticiones por minuto por usuario o IP)
+    options.AddPolicy("GeneralApiPolicy", httpContext =>
+    {
+        var partitionKey = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                           ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                           ?? "anon-general";
+        return RateLimitPartition.GetSlidingWindowLimiter(partitionKey, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = 120,
+            Window = TimeSpan.FromMinutes(1),
+            SegmentsPerWindow = 4,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 5
+        });
+    });
+});
+
 // Configurar encabezados proxy para terminación SSL en producción (Docker, Render, Cloud)
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -193,6 +273,9 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Middleware de Rate Limiting (después de autenticación para que reconozca el UserId del token JWT)
+app.UseRateLimiter();
 
 // Endpoint de monitoreo para health checks en producción
 app.MapGet("/health", () => Results.Ok(new 

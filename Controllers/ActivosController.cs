@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using it_ops_backend.DTOs;
 using it_ops_backend.Models;
 using it_ops_backend.Services.Interfaces;
@@ -9,6 +10,7 @@ namespace it_ops_backend.Controllers;
 
 [ApiController]
 [Route("api/activos")]
+[EnableRateLimiting("GeneralApiPolicy")]
 public class ActivosController : ControllerBase
 {
     private readonly IActivosService _activosService;

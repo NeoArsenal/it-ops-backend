@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using it_ops_backend.DTOs;
 using it_ops_backend.Models;
 using it_ops_backend.Services.Interfaces;
@@ -9,6 +10,7 @@ namespace it_ops_backend.Controllers;
 
 [ApiController]
 [Route("api/tickets")]
+[EnableRateLimiting("GeneralApiPolicy")]
 public class TicketsController : ControllerBase
 {
     private readonly ITicketsService _ticketsService;
@@ -96,6 +98,7 @@ public class TicketsController : ControllerBase
 
     // Subida de foto de evidencia a Supabase Storage
     [HttpPost("upload-foto")]
+    [EnableRateLimiting("UploadPolicy")]
     public async Task<IActionResult> UploadFoto(IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -113,6 +116,7 @@ public class TicketsController : ControllerBase
 
     // Crear ticket desde el portal o panel
     [HttpPost]
+    [EnableRateLimiting("PortalTicketsPolicy")]
     public async Task<IActionResult> Create([FromBody] CreateTicketDto dto)
     {
         // Protección Honeypot

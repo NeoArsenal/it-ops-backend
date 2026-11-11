@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using it_ops_backend.DTOs;
 using it_ops_backend.Services.Interfaces;
 
@@ -8,6 +9,7 @@ namespace it_ops_backend.Controllers;
 
 [ApiController]
 [Route("api/auth")]
+[EnableRateLimiting("GeneralApiPolicy")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -20,6 +22,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting("LoginPolicy")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var result = await _authService.LoginAsync(dto.Email, dto.Password);
