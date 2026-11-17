@@ -300,6 +300,7 @@ using (var scope = app.Services.CreateScope())
         db.Database.ExecuteSqlRaw(@"
             ALTER TABLE tickets ADD COLUMN IF NOT EXISTS categoria VARCHAR(50) DEFAULT 'GENERAL';
             ALTER TABLE activos ADD COLUMN IF NOT EXISTS ""fechaIngreso"" TIMESTAMP WITH TIME ZONE;
+            ALTER TABLE activos ADD COLUMN IF NOT EXISTS ""fechaBaja"" TIMESTAMP WITH TIME ZONE;
             UPDATE activos SET ""fechaIngreso"" = ""fechaRegistro"" WHERE ""fechaIngreso"" IS NULL;
         ");
     }

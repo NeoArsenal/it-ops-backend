@@ -80,6 +80,9 @@ public class Activo
     [Column("fechaIngreso")]
     public DateTime? FechaIngreso { get; set; }
 
+    [Column("fechaBaja")]
+    public DateTime? FechaBaja { get; set; }
+
     [NotMapped]
     public DateTime CreadoEn => FechaRegistro;
 

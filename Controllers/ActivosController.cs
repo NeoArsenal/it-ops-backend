@@ -65,7 +65,8 @@ public class ActivosController : ControllerBase
             Observaciones = dto.Observaciones,
             UbicacionId = dto.UbicacionId,
             RegistradoPorId = dto.RegistradoPorId,
-            FechaIngreso = dto.FechaIngreso ?? DateTime.UtcNow,
+            FechaIngreso = dto.FechaIngreso,
+            FechaBaja = dto.FechaBaja ?? (dto.Estado == "BAJA" ? DateTime.UtcNow : null),
             FechaRegistro = DateTime.UtcNow,
             FechaActualizacion = DateTime.UtcNow
         };
@@ -104,7 +105,13 @@ public class ActivosController : ControllerBase
             if (dto.Responsable != null) a.Responsable = dto.Responsable;
             if (dto.ResponsableNombre != null) a.Responsable = dto.ResponsableNombre;
             if (dto.Observaciones != null) a.Observaciones = dto.Observaciones;
-            if (dto.FechaIngreso.HasValue) a.FechaIngreso = dto.FechaIngreso.Value;
+            if (dto.ClearFechaIngreso == true) a.FechaIngreso = null;
+            else if (dto.FechaIngreso.HasValue) a.FechaIngreso = dto.FechaIngreso.Value;
+
+            if (dto.ClearFechaBaja == true) a.FechaBaja = null;
+            else if (dto.FechaBaja.HasValue) a.FechaBaja = dto.FechaBaja.Value;
+            else if (dto.Estado == "BAJA" && !a.FechaBaja.HasValue) a.FechaBaja = DateTime.UtcNow;
+            else if (dto.Estado != null && dto.Estado != "BAJA" && a.Estado == "BAJA") a.FechaBaja = null;
         }, tecnicoId, dto.FechaIntervencion);
 
         if (updated == null) return NotFound(new { message = "Activo no encontrado." });

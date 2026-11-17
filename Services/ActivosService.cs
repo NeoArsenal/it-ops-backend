@@ -155,11 +155,11 @@ public class ActivosService : IActivosService
     private record Snapshot(
         string Codigo, string Tipo, string Estado, string? Marca, string? Modelo,
         string? NumeroSerie, string? CodigoFactura, string? Sede, string? Departamento,
-        string? Ubicacion, string? Responsable, string? Observaciones, DateTime? FechaIngreso)
+        string? Ubicacion, string? Responsable, string? Observaciones, DateTime? FechaIngreso, DateTime? FechaBaja)
     {
         public static Snapshot From(Activo a) => new(
             a.Codigo, a.Tipo, a.Estado, a.Marca, a.Modelo, a.NumeroSerie, a.CodigoFactura,
-            a.Sede, a.Departamento, a.UbicacionTexto, a.Responsable, a.Observaciones, a.FechaIngreso);
+            a.Sede, a.Departamento, a.UbicacionTexto, a.Responsable, a.Observaciones, a.FechaIngreso, a.FechaBaja);
     }
 
     private static bool Changed(string? a, string? b) =>
@@ -190,6 +190,8 @@ public class ActivosService : IActivosService
         if (Changed(a.CodigoFactura, d.CodigoFactura)) datosCambio.Add($"Factura: {Show(a.CodigoFactura)} → {Show(d.CodigoFactura)}");
         if (a.FechaIngreso?.Date != d.FechaIngreso?.Date)
             datosCambio.Add($"Fecha ingreso: {(a.FechaIngreso.HasValue ? a.FechaIngreso.Value.ToString("dd/MM/yyyy") : "—")} → {(d.FechaIngreso.HasValue ? d.FechaIngreso.Value.ToString("dd/MM/yyyy") : "—")}");
+        if (a.FechaBaja?.Date != d.FechaBaja?.Date)
+            datosCambio.Add($"Fecha baja: {(a.FechaBaja.HasValue ? a.FechaBaja.Value.ToString("dd/MM/yyyy") : "—")} → {(d.FechaBaja.HasValue ? d.FechaBaja.Value.ToString("dd/MM/yyyy") : "—")}");
 
         if (!estadoCambio && !ubicCambio && !respCambio && !obsCambio && datosCambio.Count == 0)
             return null; // Sin cambios reales: no se ensucia el historial
