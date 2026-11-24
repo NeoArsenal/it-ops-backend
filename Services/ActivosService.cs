@@ -109,13 +109,29 @@ public class ActivosService : IActivosService
         var descripcion = BuildAuditDescription(antes, despues);
         if (descripcion != null)
         {
+            // Validar que el técnico exista para no violar la FK en PostgreSQL
+            if (tecnicoId.HasValue)
+            {
+                var existeTecnico = await _context.Usuarios.AnyAsync(u => u.Id == tecnicoId.Value);
+                if (!existeTecnico)
+                {
+                    tecnicoId = null;
+                }
+            }
+
+            var fechaFinal = fechaIntervencion.HasValue
+                ? (fechaIntervencion.Value.Kind == DateTimeKind.Utc
+                    ? fechaIntervencion.Value
+                    : DateTime.SpecifyKind(fechaIntervencion.Value, DateTimeKind.Utc))
+                : DateTime.UtcNow;
+
             activo.FechaActualizacion = DateTime.UtcNow;
             _context.Intervenciones.Add(new Intervencion
             {
                 ActivoId = activo.Id,
                 Descripcion = descripcion,
                 TecnicoId = tecnicoId,
-                Fecha = fechaIntervencion ?? DateTime.UtcNow
+                Fecha = fechaFinal
             });
             await _context.SaveChangesAsync();
         }
